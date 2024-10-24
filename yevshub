@@ -1,0 +1,937 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "🏠Yevs Hub🏠",
+    LoadingTitle = "🏠Yevs Hub🏠",
+    LoadingSubtitle = "by Yevscripts",
+    ConfigurationSaving = {
+       Enabled = true,
+       FolderName = nil, -- Create a custom folder for your hub/game
+       FileName = "Yevs hub"
+    },
+    Discord = {
+       Enabled = false,
+       Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ABCD would be ABCD
+       RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+    },
+    KeySystem = false, -- Set this to true to use our key system
+    KeySettings = {
+       Title = "Untitled",
+       Subtitle = "Key System",
+       Note = "No method of obtaining the key is provided",
+       FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+       SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+       GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+       Key = {"Hello"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+    }
+ })
+
+ local Tab = Window:CreateTab("🏠Home", 4483362458) -- Title, Image
+
+
+ local Button = Tab:CreateButton({
+    Name = "👽Infinite Yeild",
+    Callback = function()
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+    end,
+ })
+
+ local Button = Tab:CreateButton({
+    Name = "🔫AimLock (right click player)",
+    Callback = function()
+        local Area = game:GetService("Workspace")
+        local RunService = game:GetService("RunService")
+        local UIS = game:GetService("UserInputService")
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+        local MyCharacter = LocalPlayer.Character
+        local MyRoot = MyCharacter:FindFirstChild("HumanoidRootPart")
+        local MyHumanoid = MyCharacter:FindFirstChild("Humanoid")
+        local Mouse = LocalPlayer:GetMouse()
+        local MyView = Area.CurrentCamera
+        local MyTeamColor = LocalPlayer.TeamColor
+        local HoldingM2 = false
+        local Active = false
+        local Lock = false
+        local Epitaph = .187 ---Note: The Bigger The Number, The More Prediction.
+        local HeadOffset = Vector3.new(0, .1, 0)
+        
+        _G.TeamCheck = false
+        _G.AimPart = "HumanoidRootPart"
+        _G.Sensitivity = 0
+        _G.CircleSides = 64
+        _G.CircleColor = Color3.fromRGB(255, 0, 130)
+        _G.CircleTransparency = 0
+        _G.CircleRadius = 200
+        _G.CircleFilled = false
+        _G.CircleVisible = true
+        _G.CircleThickness = 1
+        
+        local FOVCircle = Drawing.new("Circle")
+        FOVCircle.Position = Vector2.new(MyView.ViewportSize.X / 2, MyView.ViewportSize.Y / 2)
+        FOVCircle.Radius = _G.CircleRadius
+        FOVCircle.Filled = _G.CircleFilled
+        FOVCircle.Color = _G.CircleColor
+        FOVCircle.Visible = _G.CircleVisible
+        FOVCircle.Transparency = _G.CircleTransparency
+        FOVCircle.NumSides = _G.CircleSides
+        FOVCircle.Thickness = _G.CircleThickness
+        
+        local function CursorLock()
+            UIS.MouseBehavior = Enum.MouseBehavior.LockCenter
+        end
+        local function UnLockCursor()
+            HoldingM2 = false Active = false Lock = false 
+            UIS.MouseBehavior = Enum.MouseBehavior.Default
+        end
+        function FindNearestPlayer()
+            local dist = math.huge
+            local Target = nil
+            for _, v in pairs(Players:GetPlayers()) do
+                if v ~= LocalPlayer and v.Character:FindFirstChild("Humanoid") and v.Character:FindFirstChild("Humanoid").Health > 0 and v.Character:FindFirstChild("HumanoidRootPart") and v then
+                    local TheirCharacter = v.Character
+                    local CharacterRoot, Visible = MyView:WorldToViewportPoint(TheirCharacter[_G.AimPart].Position)
+                    if Visible then
+                        local RealMag = (Vector2.new(Mouse.X, Mouse.Y) - Vector2.new(CharacterRoot.X, CharacterRoot.Y)).Magnitude
+                        if RealMag < dist and RealMag < FOVCircle.Radius then
+                            dist = RealMag
+                            Target = TheirCharacter
+                        end
+                    end
+                end
+            end
+            return Target
+        end
+        
+        UIS.InputBegan:Connect(function(Input)
+            if Input.UserInputType == Enum.UserInputType.MouseButton2 then
+                HoldingM2 = true
+                Active = true
+                Lock = true
+                if Active then
+                    local The_Enemy = FindNearestPlayer()
+                    while HoldingM2 do task.wait(.000001)
+                        if Lock and The_Enemy ~= nil then
+                            local Future = The_Enemy.HumanoidRootPart.CFrame + (The_Enemy.HumanoidRootPart.Velocity * Epitaph + HeadOffset)
+                            MyView.CFrame = CFrame.lookAt(MyView.CFrame.Position, Future.Position)
+                            CursorLock()
+                        end
+                    end
+                end
+            end
+        end)
+        UIS.InputEnded:Connect(function(Input)
+            if Input.UserInputType == Enum.UserInputType.MouseButton2 then
+                UnLockCursor()
+            end
+        end)
+        game.StarterGui:SetCore("SendNotification", {Title = "Working.", Text = "Success, Script Loaded.", Duration = 4,})
+    end,
+ })
+
+ local Button = Tab:CreateButton({
+    Name = "👻Esp",
+    Callback = function()
+        local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+        local LocalPlayer = Players.LocalPlayer
+        
+        -- Function to create ESP for a player
+        local function createESP(player)
+            local function onCharacterAdded(character)
+                -- Ensure the character has a HumanoidRootPart
+                local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        
+                -- Create a BoxHandleAdornment for ESP effect
+                local espBox = Instance.new("BoxHandleAdornment")
+                espBox.Size = Vector3.new(4, 6, 1)
+                espBox.Adornee = humanoidRootPart
+                espBox.AlwaysOnTop = true
+                espBox.ZIndex = 10
+                espBox.Transparency = 0.7
+                espBox.Color3 = Color3.new(1, 1, 1) -- White for all players
+        
+                espBox.Parent = game.CoreGui
+        
+                -- Create a BillboardGui for displaying player name
+                local billboard = Instance.new("BillboardGui")
+                billboard.Adornee = humanoidRootPart
+                billboard.Size = UDim2.new(0, 200, 0, 50)
+                billboard.StudsOffset = Vector3.new(0, 3, 0)
+                billboard.AlwaysOnTop = true
+                billboard.Parent = game.CoreGui
+        
+                -- Text label to show player name
+                local nameLabel = Instance.new("TextLabel")
+                nameLabel.Size = UDim2.new(1, 0, 1, 0)
+                nameLabel.Text = player.Name
+                nameLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
+                nameLabel.BackgroundTransparency = 1
+                nameLabel.TextStrokeTransparency = 0.5 -- Adds some text stroke for visibility
+                nameLabel.TextScaled = true
+                nameLabel.Parent = billboard
+        
+                -- Remove ESP when the player's character is removed
+                player.CharacterRemoving:Connect(function()
+                    if espBox then espBox:Destroy() end
+                    if billboard then billboard:Destroy() end
+                end)
+            end
+        
+            -- Handle current character and future respawns
+            if player.Character then
+                onCharacterAdded(player.Character)
+            end
+            player.CharacterAdded:Connect(onCharacterAdded)
+        end
+        
+        -- Initialize ESP for all players
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then -- Exclude local player from ESP
+                createESP(player)
+            end
+        end
+        
+        -- Update when new players join
+        Players.PlayerAdded:Connect(function(player)
+            player.CharacterAdded:Connect(function(character)
+                wait(1) -- Wait a moment to ensure the character is fully loaded
+                createESP(player) -- Create ESP for the new player
+            end)
+        end)
+        
+        -- Also update when the local player's character is added
+        LocalPlayer.CharacterAdded:Connect(function(character)
+            wait(1) -- Wait a moment to ensure the character is fully loaded
+            createESP(LocalPlayer) -- Create ESP for the local player
+        end)
+
+    end,
+ })
+
+ local Button = Tab:CreateButton({
+    Name = "🚫Anti AFK",
+    Callback = function()
+        local Rice = Instance.new("ScreenGui")
+        local Main = Instance.new("Frame")
+        local Title = Instance.new("TextLabel")
+        local Credits = Instance.new("TextLabel")
+        local Activate = Instance.new("TextButton")
+        local UICorner = Instance.new("UICorner")
+        local OpenClose = Instance.new("TextButton")
+        local UICorner_2 = Instance.new("UICorner")
+        
+        Rice.Name = "yev"
+        Rice.Parent = game.CoreGui
+        Rice.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        
+        Main.Name = "Main"
+        Main.Parent = Rice
+        Main.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        Main.BorderSizePixel = 0
+        Main.Position = UDim2.new(0.321207851, 0, 0.409807354, 0)
+        Main.Size = UDim2.new(0, 295, 0, 116)
+        Main.Visible = false
+        Main.Active = true
+        Main.Draggable =  true
+        
+        Title.Name = "Title"
+        Title.Parent = Main
+        Title.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        Title.BorderSizePixel = 0
+        Title.Size = UDim2.new(0, 295, 0, 16)
+        Title.Font = Enum.Font.GothamBold
+        Title.Text = "Yevs Anti-Afk"
+        Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Title.TextScaled = true
+        Title.TextSize = 12.000
+        Title.TextWrapped = true
+        
+        Credits.Name = "Credits"
+        Credits.Parent = Main
+        Credits.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        Credits.BorderSizePixel = 0
+        Credits.Position = UDim2.new(0, 0, 0.861901641, 0)
+        Credits.Size = UDim2.new(0, 295, 0, 16)
+        Credits.Font = Enum.Font.GothamBold
+        Credits.Text = "Made by Yev"
+        Credits.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Credits.TextScaled = true
+        Credits.TextSize = 12.000
+        Credits.TextWrapped = true
+        
+        Activate.Name = "Activate"
+        Activate.Parent = Main
+        Activate.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+        Activate.BorderColor3 = Color3.fromRGB(27, 42, 53)
+        Activate.BorderSizePixel = 0
+        Activate.Position = UDim2.new(0.0330629945, 0, 0.243326917, 0)
+        Activate.Size = UDim2.new(0, 274, 0, 59)
+        Activate.Font = Enum.Font.GothamBold
+        Activate.Text = "Activate"
+        Activate.TextColor3 = Color3.fromRGB(0, 255, 127)
+        Activate.TextSize = 43.000
+        Activate.TextStrokeColor3 = Color3.fromRGB(102, 255, 115)
+        Activate.MouseButton1Down:connect(function()
+            local vu = game:GetService("VirtualUser")
+            game:GetService("Players").LocalPlayer.Idled:connect(function()
+                vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+                wait(1)
+                vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+            end)
+        end)
+        
+        
+        UICorner.Parent = Activate
+        
+        OpenClose.Name = "Open/Close"
+        OpenClose.Parent = Rice
+        OpenClose.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+        OpenClose.Position = UDim2.new(0.353924811, 0, 0.921739101, 0)
+        OpenClose.Size = UDim2.new(0, 247, 0, 35)
+        OpenClose.Font = Enum.Font.GothamBold
+        OpenClose.Text = "Open/Close"
+        OpenClose.TextColor3 = Color3.fromRGB(255, 255, 255)
+        OpenClose.TextSize = 14.000
+        
+        UICorner_2.Parent = OpenClose
+        
+        local function NERMBF_fake_script() -- OpenClose.LocalScript 
+            local script = Instance.new('LocalScript', OpenClose)
+        
+            local frame = script.Parent.Parent.Main
+            
+            script.Parent.MouseButton1Click:Connect(function()
+                frame.Visible = not frame.Visible
+            end)
+        end
+        coroutine.wrap(NERMBF_fake_script)()
+    end,
+ })
+
+ 
+
+ local Button = Tab:CreateButton({
+    Name = "Invis (press E)",
+    Callback = function()
+ --[[Invisibility Toggle
+
+You can find the orginal concept here: https://v3rmillion.net/showthread.php?tid=544634
+
+This method clones the character locally, teleports the real character to a safe location, then sets the character to the clone.
+Basically, your real character is in the sky while you are on the ground.
+
+
+Because of the way this works, games with a decent anti-cheat will fuck this up.
+If you turn it off, you have to go to a safe place before going invisible.
+
+Written by: BitingTheDust ; https://v3rmillion.net/member.php?action=profile&uid=1628149
+]]
+--Settings:
+local ScriptStarted = false
+local Keybind = "E" --Set to whatever you want, has to be the name of a KeyCode Enum.
+local Transparency = true --Will make you slightly transparent when you are invisible. No reason to disable.
+local NoClip = false --Will make your fake character no clip.
+
+local Player = game:GetService("Players").LocalPlayer
+local RealCharacter = Player.Character or Player.CharacterAdded:Wait()
+
+local IsInvisible = false
+
+RealCharacter.Archivable = true
+local FakeCharacter = RealCharacter:Clone()
+local Part
+Part = Instance.new("Part", workspace)
+Part.Anchored = true
+Part.Size = Vector3.new(200, 1, 200)
+Part.CFrame = CFrame.new(0, -500, 0) --Set this to whatever you want, just far away from the map.
+Part.CanCollide = true
+FakeCharacter.Parent = workspace
+FakeCharacter.HumanoidRootPart.CFrame = Part.CFrame * CFrame.new(0, 5, 0)
+
+for i, v in pairs(RealCharacter:GetChildren()) do
+  if v:IsA("LocalScript") then
+      local clone = v:Clone()
+      clone.Disabled = true
+      clone.Parent = FakeCharacter
+  end
+end
+if Transparency then
+  for i, v in pairs(FakeCharacter:GetDescendants()) do
+      if v:IsA("BasePart") then
+          v.Transparency = 0.7
+      end
+  end
+end
+local CanInvis = true
+function RealCharacterDied()
+  CanInvis = false
+  RealCharacter:Destroy()
+  RealCharacter = Player.Character
+  CanInvis = true
+  isinvisible = false
+  FakeCharacter:Destroy()
+  workspace.CurrentCamera.CameraSubject = RealCharacter.Humanoid
+
+  RealCharacter.Archivable = true
+  FakeCharacter = RealCharacter:Clone()
+  Part:Destroy()
+  Part = Instance.new("Part", workspace)
+  Part.Anchored = true
+  Part.Size = Vector3.new(200, 1, 200)
+  Part.CFrame = CFrame.new(9999, 9999, 9999) --Set this to whatever you want, just far away from the map.
+  Part.CanCollide = true
+  FakeCharacter.Parent = workspace
+  FakeCharacter.HumanoidRootPart.CFrame = Part.CFrame * CFrame.new(0, 5, 0)
+
+  for i, v in pairs(RealCharacter:GetChildren()) do
+      if v:IsA("LocalScript") then
+          local clone = v:Clone()
+          clone.Disabled = true
+          clone.Parent = FakeCharacter
+      end
+  end
+  if Transparency then
+      for i, v in pairs(FakeCharacter:GetDescendants()) do
+          if v:IsA("BasePart") then
+              v.Transparency = 0.7
+          end
+      end
+  end
+ RealCharacter.Humanoid.Died:Connect(function()
+ RealCharacter:Destroy()
+ FakeCharacter:Destroy()
+ end)
+ Player.CharacterAppearanceLoaded:Connect(RealCharacterDied)
+end
+RealCharacter.Humanoid.Died:Connect(function()
+ RealCharacter:Destroy()
+ FakeCharacter:Destroy()
+ end)
+Player.CharacterAppearanceLoaded:Connect(RealCharacterDied)
+local PseudoAnchor
+game:GetService "RunService".RenderStepped:Connect(
+  function()
+      if PseudoAnchor ~= nil then
+          PseudoAnchor.CFrame = Part.CFrame * CFrame.new(0, 5, 0)
+      end
+       if NoClip then
+      FakeCharacter.Humanoid:ChangeState(11)
+       end
+  end
+)
+
+PseudoAnchor = FakeCharacter.HumanoidRootPart
+local function Invisible()
+  if IsInvisible == false then
+      local StoredCF = RealCharacter.HumanoidRootPart.CFrame
+      RealCharacter.HumanoidRootPart.CFrame = FakeCharacter.HumanoidRootPart.CFrame
+      FakeCharacter.HumanoidRootPart.CFrame = StoredCF
+      RealCharacter.Humanoid:UnequipTools()
+      Player.Character = FakeCharacter
+      workspace.CurrentCamera.CameraSubject = FakeCharacter.Humanoid
+      PseudoAnchor = RealCharacter.HumanoidRootPart
+      for i, v in pairs(FakeCharacter:GetChildren()) do
+          if v:IsA("LocalScript") then
+              v.Disabled = false
+          end
+      end
+
+      IsInvisible = true
+  else
+      local StoredCF = FakeCharacter.HumanoidRootPart.CFrame
+      FakeCharacter.HumanoidRootPart.CFrame = RealCharacter.HumanoidRootPart.CFrame
+     
+      RealCharacter.HumanoidRootPart.CFrame = StoredCF
+     
+      FakeCharacter.Humanoid:UnequipTools()
+      Player.Character = RealCharacter
+      workspace.CurrentCamera.CameraSubject = RealCharacter.Humanoid
+      PseudoAnchor = FakeCharacter.HumanoidRootPart
+      for i, v in pairs(FakeCharacter:GetChildren()) do
+          if v:IsA("LocalScript") then
+              v.Disabled = true
+          end
+      end
+      IsInvisible = false
+  end
+end
+
+game:GetService("UserInputService").InputBegan:Connect(
+  function(key, gamep)
+      if gamep then
+          return
+      end
+      if key.KeyCode.Name:lower() == Keybind:lower() and CanInvis and RealCharacter and FakeCharacter then
+          if RealCharacter:FindFirstChild("HumanoidRootPart") and FakeCharacter:FindFirstChild("HumanoidRootPart") then
+              Invisible()
+          end
+      end
+  end
+)
+local Sound = Instance.new("Sound",game:GetService("SoundService"))
+Sound.SoundId = "rbxassetid://232127604"
+Sound:Play()
+game:GetService("StarterGui"):SetCore("SendNotification",{["Title"] = "Invisible Toggle Loaded",["Text"] = "Press "..Keybind.." to become change visibility.",["Duration"] = 20,["Button1"] = "Okay."})
+    
+    end,
+ })
+
+
+ local Button = Tab:CreateButton({
+    Name = "🦋RTX",
+    Callback = function()
+        getgenv().mode = "Summer" -- Choose from Summer and Autumn
+
+
+
+
+        local a = game.Lighting
+        a.Ambient = Color3.fromRGB(33, 33, 33)
+        a.Brightness = 6.67
+        a.ColorShift_Bottom = Color3.fromRGB(0, 0, 0)
+        a.ColorShift_Top = Color3.fromRGB(255, 247, 237)
+        a.EnvironmentDiffuseScale = 0.105
+        a.EnvironmentSpecularScale = 0.522
+        a.GlobalShadows = true
+        a.OutdoorAmbient = Color3.fromRGB(51, 54, 67)
+        a.ShadowSoftness = 0.04
+        a.GeographicLatitude = -15.525
+        a.ExposureCompensation = 0.75
+        local b = Instance.new("BloomEffect", a)
+        b.Enabled = true
+        b.Intensity = 0.04
+        b.Size = 1900
+        b.Threshold = 0.915
+        local c = Instance.new("ColorCorrectionEffect", a)
+        c.Brightness = 0.176
+        c.Contrast = 0.39
+        c.Enabled = true
+        c.Saturation = 0.2
+        c.TintColor = Color3.fromRGB(217, 145, 57)
+        if getgenv().mode == "Summer" then
+           c.TintColor = Color3.fromRGB(255, 220, 148)
+        elseif getgenv().mode == "Autumn" then
+           c.TintColor = Color3.fromRGB(217, 145, 57)
+        else
+           warn("No mode selected!")
+           print("Please select a mode")
+           b:Destroy()
+           c:Destroy()
+        end
+        local d = Instance.new("DepthOfFieldEffect", a)
+        d.Enabled = true
+        d.FarIntensity = 0.077
+        d.FocusDistance = 21.54
+        d.InFocusRadius = 20.77
+        d.NearIntensity = 0.277
+        local e = Instance.new("ColorCorrectionEffect", a)
+        e.Brightness = 0
+        e.Contrast = -0.07
+        e.Saturation = 0
+        e.Enabled = true
+        e.TintColor = Color3.fromRGB(255, 247, 239)
+        local e2 = Instance.new("ColorCorrectionEffect", a)
+        e2.Brightness = 0.2
+        e2.Contrast = 0.45
+        e2.Saturation = -0.1
+        e2.Enabled = true
+        e2.TintColor = Color3.fromRGB(255, 255, 255)
+        local s = Instance.new("SunRaysEffect", a)
+        s.Enabled = true
+        s.Intensity = 0.01
+        s.Spread = 0.146
+        
+        print("RTX Graphics loaded \n created by Yevscripts")
+    end,
+ })
+
+ local Button = Tab:CreateButton({
+    Name = "Yevs MM2",
+    Callback = function()
+        local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+        local Window = Rayfield:CreateWindow({
+            Name = "Yevscripts MM2 hub",
+            LoadingTitle = "👽Yevscripts MM2 Hub👽",
+            LoadingSubtitle = "by Yevscripts",
+            ConfigurationSaving = {
+               Enabled = true,
+               FolderName = nil, -- Create a custom folder for your hub/game
+               FileName = "Yevs mm2"
+            },
+            Discord = {
+               Enabled = true,
+               Invite = "8e92mnXQRj", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ABCD would be ABCD
+               RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+            },
+            KeySystem = false, -- Set this to true to use our key system
+            KeySettings = {
+               Title = "Untitled",
+               Subtitle = "Key System",
+               Note = "No method of obtaining the key is provided",
+               FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+               SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+               GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+               Key = {"Hello"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+            }
+         })
+        
+        
+         local Tab = Window:CreateTab("Home🏠", nil) -- Title, Image
+        
+         
+         local Tab = Window:CreateTab("Hacks", 4483362458) -- Title, Image
+         local Section = Tab:CreateSection("Esp")
+        
+         local Button = Tab:CreateButton({
+            Name = "Esp",
+            Callback = function()
+            -- Simple ESP Script for Murder Mystery 2 (Educational Use Only)
+        
+        local Players = game:GetService("Players")
+        local RunService = game:GetService("RunService")
+        local LocalPlayer = Players.LocalPlayer
+        
+        -- Function to create ESP for a player
+        local function createESP(player)
+            local function onCharacterAdded(character)
+                -- Ensure the character has a HumanoidRootPart
+                local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        
+                -- Create a BoxHandleAdornment for ESP effect
+                local espBox = Instance.new("BoxHandleAdornment")
+                espBox.Size = Vector3.new(4, 6, 1)
+                espBox.Adornee = humanoidRootPart
+                espBox.AlwaysOnTop = true
+                espBox.ZIndex = 10
+                espBox.Transparency = 0.7
+                espBox.Color3 = Color3.new(1, 1, 1) -- White for all players
+        
+                espBox.Parent = game.CoreGui
+        
+                -- Create a BillboardGui for displaying player name
+                local billboard = Instance.new("BillboardGui")
+                billboard.Adornee = humanoidRootPart
+                billboard.Size = UDim2.new(0, 200, 0, 50)
+                billboard.StudsOffset = Vector3.new(0, 3, 0)
+                billboard.AlwaysOnTop = true
+                billboard.Parent = game.CoreGui
+        
+                -- Text label to show player name
+                local nameLabel = Instance.new("TextLabel")
+                nameLabel.Size = UDim2.new(1, 0, 1, 0)
+                nameLabel.Text = player.Name
+                nameLabel.TextColor3 = Color3.new(1, 1, 1) -- White text
+                nameLabel.BackgroundTransparency = 1
+                nameLabel.TextStrokeTransparency = 0.5 -- Adds some text stroke for visibility
+                nameLabel.TextScaled = true
+                nameLabel.Parent = billboard
+        
+                -- Remove ESP when the player's character is removed
+                player.CharacterRemoving:Connect(function()
+                    if espBox then espBox:Destroy() end
+                    if billboard then billboard:Destroy() end
+                end)
+            end
+        
+            -- Handle current character and future respawns
+            if player.Character then
+                onCharacterAdded(player.Character)
+            end
+            player.CharacterAdded:Connect(onCharacterAdded)
+        end
+        
+        -- Initialize ESP for all players
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then -- Exclude local player from ESP
+                createESP(player)
+            end
+        end
+        
+        -- Update when new players join
+        Players.PlayerAdded:Connect(function(player)
+            player.CharacterAdded:Connect(function(character)
+                wait(1) -- Wait a moment to ensure the character is fully loaded
+                createESP(player) -- Create ESP for the new player
+            end)
+        end)
+        
+        -- Also update when the local player's character is added
+        LocalPlayer.CharacterAdded:Connect(function(character)
+            wait(1) -- Wait a moment to ensure the character is fully loaded
+            createESP(LocalPlayer) -- Create ESP for the local player
+        end)
+        
+            end,
+         })
+        
+         local Section = Tab:CreateSection("Trading")
+        
+         local TextBox = Tab:CreateInput({
+            Name = "Player Name",
+            PlaceholderText = "Enter player name...",
+            RemoveTextAfterFocusLost = false,
+            Callback = function(Text)
+                -- The function that takes place when the input is changed
+                playerNameTextbox = Text
+            end,
+        })
+        
+        
+        
+        local Button = Tab:CreateButton({
+            Name = "Force Trade",
+            Callback = function()
+                if playerNameTextbox and playerNameTextbox ~= "" then
+                    local player = game.Players:FindFirstChild(playerNameTextbox)
+        
+                    if player then
+                        local args = {
+                            [1] = player
+                        }
+        
+                        game:GetService("ReplicatedStorage"):WaitForChild("Trade"):WaitForChild("SendRequest"):InvokeServer(unpack(args))
+        
+                        game:GetService("ReplicatedStorage"):WaitForChild("Trade"):WaitForChild("AcceptRequest"):FireServer()
+        
+                        Rayfield:Notify({
+                            Title = "Trade System",
+                            Content = "Force Traded Player: " .. playerNameTextbox,
+                            Duration = 5,
+                            Image = 4483362458,
+                            Actions = {
+                                Ignore = {
+                                    Name = "Okay!",
+                                    Callback = function()
+                                    end
+                                },
+                            },
+                        })
+                    else
+                        Rayfield:Notify({
+                            Title = "Trade System",
+                            Content = "Player not found.",
+                            Duration = 5,
+                            Image = 4483362458,
+                            Actions = {
+                                Ignore = {
+                                    Name = "Okay!",
+                                    Callback = function()
+                                    end
+                                },
+                            },
+                        })
+                    end
+                else
+                    Rayfield:Notify({
+                        Title = "Trade System",
+                        Content = "Please enter a valid player name.",
+                        Duration = 5,
+                        Image = 4483362458,
+                        Actions = {
+                            Ignore = {
+                                Name = "Okay!",
+                                Callback = function()
+                                end
+                            },
+                        },
+                    })
+                end
+            end,
+        })
+        
+        local Section = Tab:CreateSection("role op")
+        
+        local Button = Tab:CreateButton({
+           Name = "Chat Expose Roles",
+           Callback = function()
+           local allPlayers = game.Players:GetPlayers()
+        
+        for _, player in pairs(allPlayers) do
+            local backpack = player:FindFirstChild("Backpack")
+            
+            if backpack then
+                if backpack:FindFirstChild("Knife") then
+                    local args = {
+                        [1] = player.Name .. ": Has The Knife",
+                        [2] = "normalchat"
+                    }
+        
+                    game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(unpack(args))
+                end
+                
+                if backpack:FindFirstChild("Gun") then
+                    local args = {
+                        [1] = player.Name .. ": Has The Gun",
+                        [2] = "normalchat"
+                    }
+        
+                    game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(unpack(args))
+                end
+            end
+        end
+           end,
+        })
+        
+        local Label = Tab:CreateLabel("Gun Not Dropped") -- Use "Label" instead of "GunLabel"
+        coroutine.wrap(function()
+            local gunDropped = false
+            while wait(1) do
+                local gunExists = Workspace:FindFirstChild("GunDrop")
+                
+                if gunExists then
+                    Label:Set("Gun Dropped") -- Update to use "Label" instead of "GunLabel"
+                    
+                    -- Only send notification if the gun has been dropped since last check
+                    if not gunDropped then
+                        gunDropped = true
+                        Rayfield:Notify({
+                            Title = "Gun Status",
+                            Content = "Gun Dropped",
+                            Duration = 6.5,
+                            Image = 5578470911,
+                            Actions = {
+                                Ignore = {
+                                    Name = "Okay!",
+                                    Callback = function()
+                                        print("The user tapped Okay!")
+                                    end
+                                },
+                            },
+                        })
+                    end
+                else
+                    Label:Set("Gun Not Dropped") -- Update to use "Label" instead of "GunLabel"
+                    gunDropped = false
+                end
+            end
+        end)()
+        
+        local MurdererLabel = Tab:CreateLabel("Murderer is: Unknown")
+        local SheriffLabel = Tab:CreateLabel("Sheriff is: Unknown")
+        
+        -- Function to check and update the roles based on tools in players' backpacks
+        local function updateRolesInfo()
+            while true do
+                local players = game:GetService("Players"):GetPlayers()
+                local murderer, sheriff = "Unknown", "Unknown"
+        
+                for _, player in ipairs(players) do
+                    if player.Character then
+                        local backpack = player.Backpack
+                        if backpack then
+                            for _, tool in ipairs(backpack:GetChildren()) do
+                                if tool:IsA("Tool") then
+                                    if tool.Name == "Knife" then
+                                        murderer = player.Name
+                                    elseif tool.Name == "Gun" then
+                                        sheriff = player.Name
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+        
+                MurdererLabel:Set("Murderer is: " .. murderer)
+                SheriffLabel:Set("Sheriff is: " .. sheriff)
+        
+                wait(1)
+            end
+        end
+        
+        -- Start updating the Murderer and Sheriff information
+        coroutine.wrap(updateRolesInfo)()
+        
+        local ESPFolder = Instance.new("Folder")
+        ESPFolder.Name = "ESP Holder"
+        ESPFolder.Parent = game.CoreGui
+        
+        local function AddBillboard(player)
+            local Billboard = Instance.new("BillboardGui")
+            Billboard.Name = player.Name .. "Billboard"
+            Billboard.AlwaysOnTop = true
+            Billboard.Size = UDim2.new(0, 200, 0, 50)
+            Billboard.ExtentsOffset = Vector3.new(0, 3, 0)
+            Billboard.Enabled = false
+            Billboard.Parent = ESPFolder
+        
+            local TextLabel = Instance.new("TextLabel")
+            TextLabel.TextSize = 20
+            TextLabel.Text = player.Name
+            TextLabel.Font = Enum.Font.FredokaOne
+            TextLabel.BackgroundTransparency = 1
+            TextLabel.Size = UDim2.new(1, 0, 1, 0)
+            TextLabel.TextStrokeTransparency = 0
+            TextLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
+            TextLabel.Parent = Billboard
+        
+            repeat
+                wait()
+                pcall(function()
+                    Billboard.Adornee = player.Character.Head
+                    if player.Character:FindFirstChild("Knife") or player.Backpack:FindFirstChild("Knife") then
+                        TextLabel.TextColor3 = Color3.new(1, 0, 0)
+                        if getgenv().MurderEsp then
+                            Billboard.Enabled = true
+                        end
+                    elseif player.Character:FindFirstChild("Gun") or player.Backpack:FindFirstChild("Gun") then
+                        TextLabel.TextColor3 = Color3.new(0, 0, 1)
+                        if getgenv().SheriffEsp then
+                            Billboard.Enabled = true
+                        end
+                    else
+                        TextLabel.TextColor3 = Color3.new(0, 1, 0)
+                        if getgenv().AllEsp then
+                            Billboard.Enabled = true
+                        end
+                    end
+                end)
+            until not player.Parent
+        end
+        
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player ~= game.Players.LocalPlayer then
+                coroutine.wrap(AddBillboard)(player)
+            end
+        end
+        
+        game.Players.PlayerAdded:Connect(function(player)
+            if player ~= game.Players.LocalPlayer then
+                coroutine.wrap(AddBillboard)(player)
+            end
+        end)
+        
+        game.Players.PlayerRemoving:Connect(function(player)
+            local billboard = ESPFolder:FindFirstChild(player.Name .. "Billboard")
+            if billboard then
+                billboard:Destroy()
+            end
+        end)
+    end,
+ })
+
+ local Slider = Tab:CreateSlider({
+    Name = "WalkSpeed",
+    Range = {0, 100},
+    Increment = 1,
+    Suffix = "Speed",
+    CurrentValue = 16,
+    Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = (Value)
+    end,
+ })
+ 
+ local Slider = Tab:CreateSlider({
+    Name = "Jump Power",
+    Range = {0, 500},
+    Increment = 1,
+    Suffix = "Jump power",
+    CurrentValue = 50,
+    Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+    Callback = function(Value)
+        game.Players.LocalPlayer.Character.Humanoid.JumpPower = (Value)
+    end,
+ })
